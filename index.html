@@ -385,15 +385,25 @@
             alert('Chave de API salva com sucesso!');
         };
 
-        window.generateAISuggestions = async (id) => {
-            const h = state.hospedagens.find(x => x.id === id);
-            if (!h || state.loadingAI[id]) return;
+        window.generateAISuggestions = async (id, type = 'hospedagem') => {
+            const item = type === 'hospedagem' ? state.hospedagens.find(x => x.id === id) : state.passeios.find(x => x.id === id);
+            if (!item || state.loadingAI[id]) return;
             window.setState({ loadingAI: { ...state.loadingAI, [id]: true } });
             try {
                 const apiKey = state.geminiKey;
                 if (!apiKey) throw new Error("MISSING_API_KEY");
                 const ai = new GoogleGenAI(apiKey);
-                const prompt = `Atue como um concierge VIP. Para o hotel "${h.hotel}" em "${h.cidade}", forneça sugestões úteis num raio de 500 metros (caminhada). Liste: estações de transporte, supermercados, farmácias e cafeterias para café da manhã. Seja conciso e prático.`;
+
+                let prompt = "";
+                if (type === 'hospedagem') {
+                    prompt = `Atue como um concierge VIP. Para o hotel "${item.hotel}" em "${item.cidade}", forneça sugestões úteis num raio de 500 metros (caminhada). Liste: estações de transporte, supermercados, farmácias e cafeterias para café da manhã. Seja conciso e prático.`;
+                } else {
+                    prompt = `Atue como um especialista em roteiros turísticos. Para o passeio que sai de "${item.origem}" e pretende visitar estes locais: "${item.locais_visitar}". 
+                    1. Analise geograficamente os locais e sugira a melhor sequência lógica para visitá-los partindo da origem. 
+                    2. Sugira os melhores caminhos ou meios de transporte recomendados entre eles. 
+                    3. Forneça dicas práticas de tempo e logística. Seja conciso e organize em tópicos práticos.`;
+                }
+
                 const response = await ai.models.generateContent({
                     model: 'gemini-3-flash-preview',
                     contents: prompt,
@@ -676,7 +686,7 @@
                                         </p>
                                     </div>
                                     <div class="flex gap-2 w-full sm:w-auto">
-                                        <button onclick="generateAISuggestions('${h.id}')" title="Sugestões IA" class="flex-1 sm:flex-none p-3 md:p-4 rounded-xl bg-accent/10 text-accent hover:bg-accent hover:text-white transition-all shadow-sm">
+                                        <button onclick="generateAISuggestions('${h.id}', 'hospedagem')" title="Sugestões IA" class="flex-1 sm:flex-none p-3 md:p-4 rounded-xl bg-accent/10 text-accent hover:bg-accent hover:text-white transition-all shadow-sm">
                                             <i class="fa-solid ${state.loadingAI[h.id] ? 'fa-circle-notch animate-spin' : 'fa-wand-magic-sparkles'} text-sm"></i>
                                         </button>
                                         ${state.user.role === 'admin' ? `
@@ -964,12 +974,21 @@
                                         </div>
                                     </div>
                                     <div class="flex gap-2 w-full sm:w-auto">
+                                        <button onclick="generateAISuggestions('${p.id}', 'passeio')" title="Roteiro IA" class="flex-1 sm:flex-none p-3 md:p-4 rounded-xl bg-accent/10 text-accent hover:bg-accent hover:text-white transition-all shadow-sm">
+                                            <i class="fa-solid ${state.loadingAI[p.id] ? 'fa-circle-notch animate-spin' : 'fa-wand-magic-sparkles'} text-sm"></i>
+                                        </button>
                                         ${state.user.role === 'admin' ? `
                                             <button onclick="openPasseioEdit('${p.id}')" title="Editar" class="flex-1 sm:flex-none p-3 md:p-4 rounded-xl bg-slate-800/10 text-slate-500 hover:bg-accent hover:text-white transition-all shadow-sm border border-slate-500/10"><i class="fa-solid fa-pen text-sm"></i></button>
                                             <button onclick="deleteItem('passeios', '${p.id}')" title="Excluir" class="flex-1 sm:flex-none text-red-500 hover:bg-red-500 hover:text-white p-3 md:p-4 rounded-xl transition-all shadow-sm border border-red-500/10"><i class="fa-solid fa-trash"></i></button>
                                         ` : ''}
                                     </div>
                                 </div>
+                                ${state.aiSuggestions[p.id] ? `
+                                    <div class="bg-blue-50/50 dark:bg-slate-900/60 p-6 md:p-8 rounded-2xl border border-blue-100 dark:border-white/5 animate-fade-up">
+                                        <p class="text-[10px] font-black uppercase tracking-widest text-accent mb-4 flex items-center gap-2"><i class="fa-solid fa-map-signs"></i> Sugestão de Roteiro e Logística (IA)</p>
+                                        <div class="text-[13px] leading-relaxed text-slate-700 dark:text-slate-200 whitespace-pre-wrap">${state.aiSuggestions[p.id]}</div>
+                                    </div>
+                                ` : ''}
                             </div>
                         `).join('')}
                     </div>
