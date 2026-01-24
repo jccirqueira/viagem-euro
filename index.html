@@ -275,6 +275,7 @@
                 ]);
 
                 const geminiKeyObj = (config.data || []).find(x => x.key === 'gemini_api_key');
+                const loadedKey = geminiKeyObj?.value || db.get('gemini_key', '') || state.geminiKey;
 
                 window.setState({
                     hospedagens: (h.data || []).map(x => ({ ...x, hotel: x.hotel_name, data_in: x.data_chegada, data_out: x.data_saida })),
@@ -283,7 +284,7 @@
                     membros: (m.data || []).map(x => ({ ...x, foto: x.foto_url })),
                     historico: (hist.data || []).map(x => ({ ...x, foto: x.foto_url, obs: x.observacoes })),
                     passeios: p.data || [],
-                    geminiKey: geminiKeyObj ? geminiKeyObj.value : state.geminiKey,
+                    geminiKey: loadedKey,
                     isLoading: false
                 });
             } catch (err) {
@@ -403,8 +404,11 @@
             if (!item || state.loadingAI[id]) return;
             window.setState({ loadingAI: { ...state.loadingAI, [id]: true } });
             try {
-                const apiKey = state.geminiKey;
-                if (!apiKey) throw new Error("MISSING_API_KEY");
+                const apiKey = state.geminiKey || db.get('gemini_key', '');
+                if (!apiKey || apiKey.length < 10) {
+                    alert("Chave Gemini não encontrada ou inválida. Por favor, configure em Ajustes.");
+                    throw new Error("MISSING_OR_INVALID_API_KEY");
+                }
                 const ai = new GoogleGenAI(apiKey);
 
                 let prompt = "";
