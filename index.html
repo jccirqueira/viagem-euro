@@ -234,6 +234,7 @@
             checklist: [],
             membros: [],
             historico: [],
+            passeios: [],
             aiSuggestions: db.get('ai_cache', {}),
             loadingAI: {},
             isMenuOpen: false,
@@ -241,6 +242,7 @@
             editingHospedagem: null,
             editingDeslocamento: null,
             editingHistorico: null,
+            editingPasseio: null,
             isLoading: false
         };
 
@@ -262,7 +264,8 @@
                     supabase.from('deslocamentos').select('*').order('data', { ascending: true }),
                     supabase.from('checklist_items').select('*').order('criado_em', { ascending: false }),
                     supabase.from('trip_members').select('*').order('nome', { ascending: true }),
-                    supabase.from('historico_entries').select('*').order('data', { ascending: false })
+                    supabase.from('historico_entries').select('*').order('data', { ascending: false }),
+                    supabase.from('passeios').select('*').order('data', { ascending: true })
                 ]);
 
                 window.setState({
@@ -271,6 +274,7 @@
                     checklist: (c.data || []).map(x => ({ ...x, text: x.titulo, done: x.status })),
                     membros: (m.data || []).map(x => ({ ...x, foto: x.foto_url })),
                     historico: (hist.data || []).map(x => ({ ...x, foto: x.foto_url, obs: x.observacoes })),
+                    passeios: p.data || [],
                     isLoading: false
                 });
             } catch (err) {
@@ -326,7 +330,8 @@
                 editingMembro: null,
                 editingHospedagem: null,
                 editingDeslocamento: null,
-                editingHistorico: null
+                editingHistorico: null,
+                editingPasseio: null
             });
         };
 
@@ -523,6 +528,31 @@
             window.setState({ view: 'historico', editingHistorico: null });
         };
 
+        window.openPasseioEdit = (id = null) => {
+            const passeio = id ? state.passeios.find(p => p.id === id) : null;
+            window.setState({ editingPasseio: passeio, view: 'passeio-edit' });
+        };
+
+        window.savePasseio = async (e) => {
+            e.preventDefault();
+            const payload = {
+                data: document.getElementById('p-data').value,
+                horario_saida: document.getElementById('p-hora').value,
+                origem: document.getElementById('p-origem').value,
+                locais_visitar: document.getElementById('p-locais').value
+            };
+
+            if (state.editingPasseio?.id) {
+                payload.id = state.editingPasseio.id;
+            }
+
+            const { error } = await supabase.from('passeios').upsert(payload);
+            if (error) return alert("Erro ao salvar: " + error.message);
+
+            fetchData();
+            window.setState({ view: 'passeio', editingPasseio: null });
+        };
+
         window.toggleCheck = async (id) => {
             const item = state.checklist.find(x => x.id === id);
             const { error } = await supabase.from('checklist_items').update({ status: !item.done }).eq('id', id);
@@ -549,7 +579,8 @@
                 'deslocamentos': 'deslocamentos',
                 'checklist': 'checklist_items',
                 'membros': 'trip_members',
-                'historico': 'historico_entries'
+                'historico': 'historico_entries',
+                'passeios': 'passeios'
             };
             const { error } = await supabase.from(tableMap[type]).delete().eq('id', id);
             if (error) return alert("Erro ao excluir: " + error.message);
@@ -561,6 +592,7 @@
                 { id: 'dashboard', icon: 'fa-chart-pie', label: 'Resumo' },
                 { id: 'hospedagem', icon: 'fa-hotel', label: 'Hospedagem' },
                 { id: 'deslocamento', icon: 'fa-route', label: 'Deslocamentos' },
+                { id: 'passeio', icon: 'fa-binoculars', label: 'Passeios' },
                 { id: 'checklist', icon: 'fa-list-check', label: 'Checklist' },
                 { id: 'historico', icon: 'fa-camera-retro', label: 'Histórico' },
                 { id: 'membros', icon: 'fa-users', label: 'Membros' },
@@ -906,6 +938,84 @@
                         <div class="flex gap-4 pt-4">
                             <button type="button" onclick="nav('historico')" class="flex-1 py-5 bg-slate-800/10 text-slate-500 rounded-2xl font-black text-[10px] uppercase tracking-widest border border-slate-500/10">Cancelar</button>
                             <button type="submit" class="flex-1 py-5 btn-primary rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-2xl flex items-center justify-center gap-2"><i class="fa-solid fa-save"></i> Registrar Memória</button>
+                        </div>
+                    </form>
+                </div>
+            `,
+            passeio: () => `
+                <div class="animate-fade-up">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 md:mb-10">
+                        <h2 class="text-2xl md:text-4xl font-black tracking-tighter flex items-center gap-4">
+                            <i class="fa-solid fa-binoculars text-accent"></i> Passeios
+                        </h2>
+                        ${state.user.role === 'admin' ? `<button onclick="openPasseioEdit()" class="w-full sm:w-auto btn-primary px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest text-white shadow-lg flex items-center justify-center gap-2"><i class="fa-solid fa-plus"></i> Novo Passeio</button>` : ''}
+                    </div>
+                    <div class="grid grid-cols-1 gap-6">
+                        ${state.passeios.map(p => `
+                            <div class="glass p-6 md:p-8 rounded-2xl flex flex-col gap-4 group hover:border-accent transition-all relative overflow-hidden">
+                                <div class="flex flex-col sm:flex-row justify-between items-start gap-4">
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-3 mb-2">
+                                            <span class="px-3 py-1 bg-accent/10 text-accent text-[10px] font-black uppercase rounded-full tracking-widest">${formatDate(p.data)}</span>
+                                            <span class="text-xs font-bold text-slate-500 uppercase"><i class="fa-regular fa-clock mr-1"></i> saída: ${p.horario_saida?.slice(0, 5) || '--:--'}</span>
+                                        </div>
+                                        <h3 class="text-xl font-black mb-1">Partida de: ${p.origem}</h3>
+                                        <div class="mt-4">
+                                            <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2"><i class="fa-solid fa-map-marked-alt text-accent"></i> Roteiro do Dia</p>
+                                            <div class="text-sm font-medium text-slate-400 leading-relaxed">${p.locais_visitar}</div>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-2 w-full sm:w-auto">
+                                        ${state.user.role === 'admin' ? `
+                                            <button onclick="openPasseioEdit('${p.id}')" title="Editar" class="flex-1 sm:flex-none p-3 md:p-4 rounded-xl bg-slate-800/10 text-slate-500 hover:bg-accent hover:text-white transition-all shadow-sm border border-slate-500/10"><i class="fa-solid fa-pen text-sm"></i></button>
+                                            <button onclick="deleteItem('passeios', '${p.id}')" title="Excluir" class="flex-1 sm:flex-none text-red-500 hover:bg-red-500 hover:text-white p-3 md:p-4 rounded-xl transition-all shadow-sm border border-red-500/10"><i class="fa-solid fa-trash"></i></button>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `,
+            'passeio-edit': () => `
+                <div class="max-w-xl mx-auto animate-fade-up">
+                    <h2 class="text-2xl md:text-3xl font-black mb-8 flex items-center gap-4">
+                        <i class="fa-solid fa-binoculars text-accent"></i> ${state.editingPasseio ? 'Editar' : 'Novo'} Passeio
+                    </h2>
+                    <form onsubmit="savePasseio(event)" class="space-y-6">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <label class="text-[9px] uppercase font-black text-slate-500 ml-2 tracking-widest">Dia do Passeio</label>
+                                <div class="input-group">
+                                    <i class="fa-regular fa-calendar"></i>
+                                    <input type="date" required id="p-data" value="${state.editingPasseio?.data || ''}" class="w-full bg-slate-900 p-5 rounded-xl outline-none focus:border-accent font-bold transition-all shadow-inner">
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-[9px] uppercase font-black text-slate-500 ml-2 tracking-widest">Horário de Saída</label>
+                                <div class="input-group">
+                                    <i class="fa-regular fa-clock"></i>
+                                    <input type="time" required id="p-hora" value="${state.editingPasseio?.horario_saida || ''}" class="w-full bg-slate-900 p-5 rounded-xl outline-none focus:border-accent font-bold transition-all shadow-inner">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[9px] uppercase font-black text-slate-500 ml-2 tracking-widest">Local de Origem</label>
+                            <div class="input-group">
+                                <i class="fa-solid fa-hotel"></i>
+                                <input required id="p-origem" value="${state.editingPasseio?.origem || ''}" placeholder="Ex: Lobby do Hotel ou Estação Central" class="w-full bg-slate-900 p-5 rounded-xl outline-none focus:border-accent font-bold transition-all shadow-inner">
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[9px] uppercase font-black text-slate-500 ml-2 tracking-widest">Locais a Visitar / Roteiro</label>
+                            <div class="input-group">
+                                <i class="fa-solid fa-map-location-dot"></i>
+                                <textarea required id="p-locais" rows="5" placeholder="Descreva os pontos que serão visitados..." class="w-full bg-slate-900 p-6 rounded-2xl outline-none focus:border-accent font-bold shadow-inner resize-none">${state.editingPasseio?.locais_visitar || ''}</textarea>
+                            </div>
+                        </div>
+                        <div class="flex gap-4 pt-6">
+                            <button type="button" onclick="nav('passeio')" class="flex-1 py-5 bg-slate-800/10 text-slate-500 rounded-xl font-black text-[10px] uppercase tracking-widest border border-slate-500/10 hover:bg-slate-800/20 transition-all">Cancelar</button>
+                            <button type="submit" class="flex-1 py-5 btn-primary rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-accent/20 flex items-center justify-center gap-2"><i class="fa-solid fa-save"></i> Salvar Passeio</button>
                         </div>
                     </form>
                 </div>

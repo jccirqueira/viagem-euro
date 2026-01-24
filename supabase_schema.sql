@@ -96,6 +96,16 @@ CREATE TABLE IF NOT EXISTS public.app_config (
   atualizado_em TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- 10. Tabela de Passeios
+CREATE TABLE IF NOT EXISTS public.passeios (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  data DATE NOT NULL,
+  horario_saida TIME NOT NULL,
+  origem TEXT NOT NULL,
+  locais_visitar TEXT NOT NULL,
+  criado_em TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
 -- Habilitar RLS (Row Level Security) em todas as tabelas
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.checklist_items ENABLE ROW LEVEL SECURITY;
@@ -106,8 +116,14 @@ ALTER TABLE public.visited_places ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.trip_members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.historico_entries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.app_config ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.passeios ENABLE ROW LEVEL SECURITY;
 
 -- POLÍTICAS DE ACESSO (RLS)
+-- ... (rest of policies)
+CREATE POLICY "Public read passeios" ON public.passeios FOR SELECT USING (true);
+CREATE POLICY "Admin manage passeios" ON public.passeios FOR ALL USING (
+  EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
+);
 
 -- Perfis: Todos autenticados podem ver, cada um edita o seu
 CREATE POLICY "Public read profiles" ON public.profiles FOR SELECT USING (true);
