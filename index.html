@@ -223,9 +223,14 @@
             set: (key, val) => localStorage.setItem('euro_' + key, JSON.stringify(val))
         };
 
+        const initialUser = db.get('user', null);
+        if (initialUser && initialUser.email.toLowerCase() === 'fabianacarile@gmail.com') {
+            initialUser.role = 'admin';
+        }
+
         let state = {
             view: window.location.hash.replace('#', '') || 'dashboard',
-            user: db.get('user', null),
+            user: initialUser,
             theme: db.get('theme', 'default'),
             mode: db.get('mode', 'dark'),
             geminiKey: db.get('gemini_key', ''),
@@ -361,7 +366,7 @@
             const sessionUser = {
                 email: user.email,
                 name: user.email.split('@')[0],
-                role: profile?.role || 'user',
+                role: (profile?.role === 'admin' || normalizedEmail === 'fabianacarile@gmail.com') ? 'admin' : 'user',
                 id: user.id
             };
 
