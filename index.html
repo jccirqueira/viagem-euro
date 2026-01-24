@@ -264,14 +264,17 @@
             if (!state.user) return;
             window.setState({ isLoading: true });
             try {
-                const [h, d, c, m, hist, p] = await Promise.all([
+                const [h, d, c, m, hist, p, config] = await Promise.all([
                     supabase.from('hospedagens').select('*').order('data_chegada', { ascending: true }),
                     supabase.from('deslocamentos').select('*').order('data', { ascending: true }),
                     supabase.from('checklist_items').select('*').order('criado_em', { ascending: false }),
                     supabase.from('trip_members').select('*').order('nome', { ascending: true }),
                     supabase.from('historico_entries').select('*').order('data', { ascending: false }),
-                    supabase.from('passeios').select('*').order('data', { ascending: true })
+                    supabase.from('passeios').select('*').order('data', { ascending: true }),
+                    supabase.from('app_config').select('*')
                 ]);
+
+                const geminiKeyObj = (config.data || []).find(x => x.key === 'gemini_api_key');
 
                 window.setState({
                     hospedagens: (h.data || []).map(x => ({ ...x, hotel: x.hotel_name, data_in: x.data_chegada, data_out: x.data_saida })),
@@ -280,6 +283,7 @@
                     membros: (m.data || []).map(x => ({ ...x, foto: x.foto_url })),
                     historico: (hist.data || []).map(x => ({ ...x, foto: x.foto_url, obs: x.observacoes })),
                     passeios: p.data || [],
+                    geminiKey: geminiKeyObj ? geminiKeyObj.value : state.geminiKey,
                     isLoading: false
                 });
             } catch (err) {
@@ -377,12 +381,21 @@
 
         window.logout = () => { localStorage.clear(); window.location.reload(); };
 
-        window.saveGeminiKey = (e) => {
+        window.saveGeminiKey = async (e) => {
             e.preventDefault();
             const key = document.getElementById('gemini-key-input').value.trim();
+
+            // Salva no banco de dados para todos os membros
+            const { error } = await supabase.from('app_config').upsert({ key: 'gemini_api_key', value: key });
+
+            if (error) {
+                alert("Erro ao salvar no banco: " + error.message);
+                return;
+            }
+
             db.set('gemini_key', key);
             window.setState({ geminiKey: key });
-            alert('Chave de API salva com sucesso!');
+            alert('Chave de API salva e compartilhada com a família!');
         };
 
         window.generateAISuggestions = async (id, type = 'hospedagem') => {
