@@ -279,11 +279,23 @@
             }
         };
 
-        const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-BR') : '---';
+        const formatDate = (d) => {
+            if (!d) return '---';
+            const dateStr = d.includes('T') ? d.split('T')[0] : d;
+            if (dateStr.length === 10 && dateStr.includes('-')) {
+                const [y, m, day] = dateStr.split('-');
+                return `${day}/${m}/${y}`;
+            }
+            return new Date(d).toLocaleDateString('pt-BR');
+        };
 
         const getTripDateLabel = () => {
             if (!state.hospedagens || state.hospedagens.length === 0) return "ABRIL 2026";
-            const sorted = [...state.hospedagens].sort((a, b) => new Date(a.data_in) - new Date(b.data_in));
+            const sorted = [...state.hospedagens].sort((a, b) => {
+                const da = a.data_in ? new Date(a.data_in + 'T12:00:00') : new Date(0);
+                const db = b.data_in ? new Date(b.data_in + 'T12:00:00') : new Date(0);
+                return da - db;
+            });
             const firstDateStr = sorted[0]?.data_in;
             if (!firstDateStr) return "ABRIL 2026";
             const date = new Date(firstDateStr + 'T12:00:00');
@@ -291,10 +303,18 @@
         };
 
         const getCountdown = () => {
-            const baseDate = state.hospedagens && state.hospedagens.length > 0
-                ? [...state.hospedagens].sort((a, b) => new Date(a.data_in) - new Date(b.data_in))[0].data_in
-                : '2026-04-01';
-            const diff = new Date(baseDate) - new Date();
+            const sortedHosp = [...state.hospedagens].sort((a, b) => {
+                const da = a.data_in ? new Date(a.data_in + 'T12:00:00') : new Date(0);
+                const db = b.data_in ? new Date(b.data_in + 'T12:00:00') : new Date(0);
+                return da - db;
+            });
+            const baseDateStr = sortedHosp.length > 0 ? sortedHosp[0].data_in : '2026-04-01';
+
+            const target = new Date(baseDateStr + 'T00:00:00');
+            const now = new Date();
+            now.setHours(0, 0, 0, 0);
+
+            const diff = target - now;
             return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
         };
 
