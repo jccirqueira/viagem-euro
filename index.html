@@ -426,12 +426,14 @@
 
                         let prompt = "";
                         if (type === 'hospedagem') {
-                            prompt = `Atue como um concierge VIP. Para o hotel "${item.hotel}" em "${item.cidade}", forneça sugestões úteis num raio de 500 metros (caminhada). Liste: estações de transporte, supermercados, farmácias e cafeterias para café da manhã. Seja conciso e prático.`;
+                            prompt = `Atue como um concierge VIP. Para o hotel "${item.hotel}" em "${item.cidade}", forneça sugestões úteis num raio de 500 metros (caminhada). Liste: estações de transporte, supermercados, farmácias, cafeterias com preços justos, banheiros públicos e pontos de água. Seja conciso e prático.`;
                         } else {
                             prompt = `Atue como um especialista em roteiros turísticos. Para o passeio que sai de "${item.origem}" e pretende visitar estes locais: "${item.locais_visitar}". 
-                            1. Analise geograficamente os locais e sugira a melhor sequência lógica para visitá-los partindo da origem. 
-                            2. Sugira os melhores caminhos ou meios de transporte recomendados entre eles. 
-                            3. Forneça dicas práticas de tempo e logística. Seja conciso e organize em tópicos práticos.`;
+                            REGRAS CRÍTICAS:
+                            1. Siga À RISCA e SEM ALUCINAR a sequência dos lugares informada.
+                            2. Todo o passeio será feito A PÉ. Dê primazia absoluta para caminhada e sugira os trajetos baseados nisso.
+                            3. Sugira pontos importantes no trajeto: Banheiros Públicos (com localização exata), pontos para encher garrafas de água (bebedouros), farmácias no caminho e cafeterias com preços justos.
+                            4. Organize em tópicos práticos seguindo a cronologia do roteiro.`;
                         }
 
                         const result = await model.generateContent(prompt);
@@ -740,7 +742,7 @@
                                 ${state.aiSuggestions[h.id] ? `
                                     <div class="bg-blue-50/50 dark:bg-slate-900/60 p-6 md:p-8 rounded-2xl border border-blue-100 dark:border-white/5 animate-fade-up">
                                         <p class="text-[10px] font-black uppercase tracking-widest text-accent mb-4 flex items-center gap-2"><i class="fa-solid fa-robot"></i> Guia de Arredores (IA Concierge)</p>
-                                        <div class="text-[13px] leading-relaxed text-slate-700 dark:text-slate-200 whitespace-pre-wrap">${state.aiSuggestions[h.id]}</div>
+                                        <div class="text-[26px] leading-relaxed text-slate-700 dark:text-slate-200 whitespace-pre-wrap">${state.aiSuggestions[h.id]}</div>
                                     </div>
                                 ` : ''}
                             </div>
@@ -1028,7 +1030,7 @@
                                 ${state.aiSuggestions[p.id] ? `
                                     <div class="bg-blue-50/50 dark:bg-slate-900/60 p-6 md:p-8 rounded-2xl border border-blue-100 dark:border-white/5 animate-fade-up">
                                         <p class="text-[10px] font-black uppercase tracking-widest text-accent mb-4 flex items-center gap-2"><i class="fa-solid fa-map-signs"></i> Sugestão de Roteiro e Logística (IA)</p>
-                                        <div class="text-[13px] leading-relaxed text-slate-700 dark:text-slate-200 whitespace-pre-wrap">${state.aiSuggestions[p.id]}</div>
+                                        <div class="text-[26px] leading-relaxed text-slate-700 dark:text-slate-200 whitespace-pre-wrap">${state.aiSuggestions[p.id]}</div>
                                     </div>
                                 ` : ''}
                             </div>
