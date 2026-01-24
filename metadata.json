@@ -1,0 +1,8 @@
+
+{
+  "name": "ViagemEuro",
+  "description": "Sistema premium de gestão de viagem para a Europa 2025.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
