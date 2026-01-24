@@ -182,7 +182,7 @@ RETURNS trigger AS $$
 BEGIN
   INSERT INTO public.profiles (id, email, nome, role)
   VALUES (new.id, new.email, '', 
-    CASE WHEN new.email = 'fabiana@email.com' THEN 'admin' ELSE 'user' END
+    CASE WHEN new.email = 'fabianacarile@gmail.com' THEN 'admin' ELSE 'user' END
   );
   RETURN new;
 END;
