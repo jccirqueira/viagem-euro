@@ -412,13 +412,17 @@
                 }
 
                 const genAI = new GoogleGenerativeAI(apiKey);
-                const modelNames = ["gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-pro"];
+                // Lista de modelos do mais eficiente para o mais compatível
+                const modelNames = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-1.0-pro"];
                 let text = "";
                 let errorDetails = "";
 
                 for (const modelName of modelNames) {
                     try {
-                        const model = genAI.getGenerativeModel({ model: modelName });
+                        console.log(`Tentando IA (API v1) com modelo: ${modelName}...`);
+                        // Forçamos a versão 'v1' que é a mais estável para produção
+                        const model = genAI.getGenerativeModel({ model: modelName }, { apiVersion: 'v1' });
+
                         let prompt = "";
                         if (type === 'hospedagem') {
                             prompt = `Atue como um concierge VIP. Para o hotel "${item.hotel}" em "${item.cidade}", forneça sugestões úteis num raio de 500 metros (caminhada). Liste: estações de transporte, supermercados, farmácias e cafeterias para café da manhã. Seja conciso e prático.`;
@@ -434,13 +438,26 @@
                         text = resp.text();
                         if (text) break;
                     } catch (e) {
-                        console.warn(`Erro com ${modelName}:`, e);
+                        console.warn(`Erro com ${modelName} na v1:`, e);
                         errorDetails = e.message;
-                        if (errorDetails.includes("403")) break;
+                        // Se for erro de chave, paramos as tentativas
+                        if (errorDetails.includes("403") || errorDetails.includes("API_KEY_INVALID")) break;
+
+                        // Fallback desesperado: Tentar na v1beta se a v1 falhar categoricamente
+                        try {
+                            console.log(`Tentando fallback v1beta para ${modelName}...`);
+                            const modelBeta = genAI.getGenerativeModel({ model: modelName });
+                            const result = await modelBeta.generateContent(prompt);
+                            const resp = await result.response;
+                            text = resp.text();
+                            if (text) break;
+                        } catch (e2) {
+                            console.warn(`Erro com ${modelName} também na v1beta.`);
+                        }
                     }
                 }
 
-                if (!text) throw new Error(errorDetails || "IA não respondeu.");
+                if (!text) throw new Error(errorDetails || "IA não pôde ser inicializada.");
 
                 const newCache = { ...state.aiSuggestions, [id]: text };
                 db.set('ai_cache', newCache);
