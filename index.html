@@ -1,6 +1,6 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,10 +9,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
-        
-        :root { 
-            --accent: #2563eb; 
-            --accent-dark: #1e40af; 
+
+        :root {
+            --accent: #2563eb;
+            --accent-dark: #1e40af;
             --bg-main: #020617;
             --bg-card: rgba(15, 23, 42, 0.7);
             --bg-input: #0f172a;
@@ -32,80 +32,163 @@
             --shadow-card: 0 4px 20px -5px rgba(0, 0, 0, 0.1);
         }
 
-        body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            background-color: var(--bg-main); 
-            color: var(--text-main); 
-            transition: background-color 0.4s ease, color 0.4s ease; 
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            transition: background-color 0.4s ease, color 0.4s ease;
         }
 
-        .bg-slate-950 { background-color: var(--bg-main) !important; }
-        .bg-slate-900 { background-color: var(--bg-input) !important; }
-        .glass { background: var(--bg-card) !important; backdrop-filter: blur(16px); border: 1px solid var(--border-glass) !important; box-shadow: var(--shadow-card); }
-        .text-slate-500 { color: var(--text-muted) !important; }
-        .text-slate-400 { color: var(--text-muted) !important; }
-        
-        .light-mode .text-white:not(.btn-primary *, .nav-link.active *, .bg-accent *, .bg-gradient-to-br *, .bg-red-500 *) { color: var(--text-main) !important; }
-        .light-mode .border-slate-800, .light-mode .border-slate-900 { border-color: var(--border-glass) !important; }
-        .light-mode input, .light-mode select, .light-mode textarea { 
-            border: 1px solid rgba(0,0,0,0.1) !important; 
+        .bg-slate-950 {
+            background-color: var(--bg-main) !important;
+        }
+
+        .bg-slate-900 {
+            background-color: var(--bg-input) !important;
+        }
+
+        .glass {
+            background: var(--bg-card) !important;
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glass) !important;
+            box-shadow: var(--shadow-card);
+        }
+
+        .text-slate-500 {
+            color: var(--text-muted) !important;
+        }
+
+        .text-slate-400 {
+            color: var(--text-muted) !important;
+        }
+
+        .light-mode .text-white:not(.btn-primary *, .nav-link.active *, .bg-accent *, .bg-gradient-to-br *, .bg-red-500 *) {
+            color: var(--text-main) !important;
+        }
+
+        .light-mode .border-slate-800,
+        .light-mode .border-slate-900 {
+            border-color: var(--border-glass) !important;
+        }
+
+        .light-mode input,
+        .light-mode select,
+        .light-mode textarea {
+            border: 1px solid rgba(0, 0, 0, 0.1) !important;
             color: #0f172a !important;
         }
 
         .light-mode .bg-slate-800\/10.text-slate-500 {
             background-color: #ffffff !important;
-            border: 1px solid rgba(0,0,0,0.15) !important;
+            border: 1px solid rgba(0, 0, 0, 0.15) !important;
             color: var(--accent) !important;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
         }
 
-        .theme-green { --accent: #10b981; --accent-dark: #065f46; }
-        .theme-orange { --accent: #f59e0b; --accent-dark: #92400e; }
-        .theme-pink { --accent: #ec4899; --accent-dark: #9d174d; }
-
-        .nav-link.active { background: var(--accent); color: white !important; box-shadow: 0 10px 20px -5px rgba(0,0,0,0.3); }
-        .btn-primary { background: var(--accent); color: white !important; }
-        .btn-primary:hover { background: var(--accent-dark); transform: translateY(-2px); }
-        .text-accent { color: var(--accent); }
-
-        .custom-scroll::-webkit-scrollbar { width: 5px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .theme-default .custom-scroll::-webkit-scrollbar-thumb { background: #1e293b; }
-        
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade-up { animation: fadeInUp 0.4s ease-out forwards; }
-
-        .avatar-container { 
-            position: relative; 
-            aspect-ratio: 1 / 1; 
-            border-radius: 1.5rem; 
-            overflow: hidden; 
-            background: var(--bg-input); 
+        .theme-green {
+            --accent: #10b981;
+            --accent-dark: #065f46;
         }
-        .avatar-img { 
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; 
+
+        .theme-orange {
+            --accent: #f59e0b;
+            --accent-dark: #92400e;
+        }
+
+        .theme-pink {
+            --accent: #ec4899;
+            --accent-dark: #9d174d;
+        }
+
+        .nav-link.active {
+            background: var(--accent);
+            color: white !important;
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white !important;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-dark);
+            transform: translateY(-2px);
+        }
+
+        .text-accent {
+            color: var(--accent);
+        }
+
+        .custom-scroll::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        .theme-default .custom-scroll::-webkit-scrollbar-thumb {
+            background: #1e293b;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-up {
+            animation: fadeInUp 0.4s ease-out forwards;
+        }
+
+        .avatar-container {
+            position: relative;
+            aspect-ratio: 1 / 1;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            background: var(--bg-input);
+        }
+
+        .avatar-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        .input-group { position: relative; }
-        .input-group i { 
-            position: absolute; 
-            left: 1.25rem; 
-            top: 50%; 
-            transform: translateY(-50%); 
-            color: var(--text-muted); 
+        .input-group {
+            position: relative;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 1.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
             font-size: 0.9rem;
         }
-        .input-group input, .input-group select, .input-group textarea { padding-left: 3rem !important; }
+
+        .input-group input,
+        .input-group select,
+        .input-group textarea {
+            padding-left: 3rem !important;
+        }
     </style>
-<script type="importmap">
+    <script type="importmap">
 {
   "imports": {
     "@google/genai": "https://esm.sh/@google/genai@^1.37.0",
@@ -116,6 +199,7 @@
 }
 </script>
 </head>
+
 <body class="antialiased overflow-hidden">
     <div id="app" class="h-screen w-full flex overflow-hidden"></div>
 
@@ -132,7 +216,7 @@
                 const val = localStorage.getItem('euro_' + key);
                 try {
                     return val ? JSON.parse(val) : def;
-                } catch(e) {
+                } catch (e) {
                     return def;
                 }
             },
@@ -196,7 +280,7 @@
         };
 
         const formatDate = (d) => d ? new Date(d).toLocaleDateString('pt-BR') : '---';
-        
+
         const getTripDateLabel = () => {
             if (!state.hospedagens || state.hospedagens.length === 0) return "ABRIL 2026";
             const sorted = [...state.hospedagens].sort((a, b) => new Date(a.data_in) - new Date(b.data_in));
@@ -207,37 +291,37 @@
         };
 
         const getCountdown = () => {
-            const baseDate = state.hospedagens && state.hospedagens.length > 0 
+            const baseDate = state.hospedagens && state.hospedagens.length > 0
                 ? [...state.hospedagens].sort((a, b) => new Date(a.data_in) - new Date(b.data_in))[0].data_in
                 : '2026-04-01';
             const diff = new Date(baseDate) - new Date();
             return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
         };
 
-        window.nav = (v) => { 
-            window.location.hash = v; 
-            window.setState({ 
-                view: v, 
-                isMenuOpen: false, 
-                editingMembro: null, 
-                editingHospedagem: null, 
+        window.nav = (v) => {
+            window.location.hash = v;
+            window.setState({
+                view: v,
+                isMenuOpen: false,
+                editingMembro: null,
+                editingHospedagem: null,
                 editingDeslocamento: null,
                 editingHistorico: null
-            }); 
+            });
         };
 
         window.login = async (e) => {
             e.preventDefault();
             const email = document.getElementById('login-email').value;
             const normalizedEmail = email.toLowerCase();
-            
+
             window.setState({ isLoading: true });
-            
+
             // Tenta criar o usuário primeiro (SignUp silencioso)
             // Se já existir, tudo bem. Se não, cria.
             // Para simplicidade técnica neste SPA, vamos apenas tentar o login.
             // O usuário deve ter sido criado via Supabase Dashboard ou SQL Schema Trigger.
-            
+
             const { data, error } = await supabase.auth.signInWithOtp({
                 email: normalizedEmail,
                 options: {
@@ -257,9 +341,9 @@
             // Simulando login para não bloquear o usuário durante o desenvolvimento,
             // mas o Supabase real exigirá a sessão.
             const isAdmin = normalizedEmail.includes('admin') || normalizedEmail.includes('fabiana');
-            const user = { 
-                email, 
-                name: email.split('@')[0], 
+            const user = {
+                email,
+                name: email.split('@')[0],
                 role: isAdmin ? 'admin' : 'user',
                 id: 'temporary-session'
             };
@@ -267,7 +351,7 @@
             window.setState({ user, isLoading: false });
             fetchData();
         };
-        
+
         window.logout = () => { localStorage.clear(); window.location.reload(); };
 
         window.saveGeminiKey = (e) => {
@@ -320,10 +404,10 @@
             if (state.editingHospedagem?.id) {
                 payload.id = state.editingHospedagem.id;
             }
-            
+
             const { error } = await supabase.from('hospedagens').upsert(payload);
             if (error) return alert("Erro ao salvar: " + error.message);
-            
+
             fetchData();
             window.setState({ view: 'hospedagem', editingHospedagem: null });
         };
@@ -401,9 +485,9 @@
 
         window.saveHistorico = async (e) => {
             e.preventDefault();
-            const payload = { 
-                local: document.getElementById('hist-local').value, 
-                observacoes: document.getElementById('hist-obs').value, 
+            const payload = {
+                local: document.getElementById('hist-local').value,
+                observacoes: document.getElementById('hist-obs').value,
                 foto_url: state.editingHistorico.foto,
                 data: state.editingHistorico.data || new Date().toISOString()
             };
@@ -429,9 +513,9 @@
         window.addCheck = async (e) => {
             e.preventDefault();
             const input = document.getElementById('c-input');
-            const { error } = await supabase.from('checklist_items').insert({ 
-                titulo: input.value, 
-                status: false 
+            const { error } = await supabase.from('checklist_items').insert({
+                titulo: input.value,
+                status: false
             });
             if (error) return alert("Erro ao adicionar: " + error.message);
             input.value = '';
@@ -439,7 +523,7 @@
         };
 
         window.deleteItem = async (type, id) => {
-            if(!confirm('Deseja excluir permanentemente?')) return;
+            if (!confirm('Deseja excluir permanentemente?')) return;
             const tableMap = {
                 'hospedagens': 'hospedagens',
                 'deslocamentos': 'deslocamentos',
@@ -456,7 +540,7 @@
             const links = [
                 { id: 'dashboard', icon: 'fa-chart-pie', label: 'Resumo' },
                 { id: 'hospedagem', icon: 'fa-hotel', label: 'Hospedagem' },
-                { id: 'deslocamento', icon: 'fa-route', label: 'Trajetos' },
+                { id: 'deslocamento', icon: 'fa-route', label: 'Deslocamentos' },
                 { id: 'checklist', icon: 'fa-list-check', label: 'Checklist' },
                 { id: 'historico', icon: 'fa-camera-retro', label: 'Histórico' },
                 { id: 'membros', icon: 'fa-users', label: 'Membros' },
@@ -907,7 +991,7 @@
 
         function render() {
             const app = document.getElementById('app');
-            if(!state.user) {
+            if (!state.user) {
                 app.innerHTML = `
                     <div class="h-screen w-full flex items-center justify-center bg-slate-950 p-6 overflow-hidden relative">
                         <div class="absolute inset-0 opacity-10 pointer-events-none">
@@ -981,9 +1065,10 @@
         if (state.theme && state.theme !== 'default') initClasses.push('theme-' + state.theme);
         if (state.mode === 'light') initClasses.push('light-mode');
         document.body.className = initClasses.join(' ');
-        
+
         if (state.user) fetchData();
         render();
     </script>
 </body>
+
 </html>
