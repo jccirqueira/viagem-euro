@@ -394,6 +394,7 @@
             const item = type === 'hospedagem' ? state.hospedagens.find(x => x.id === id) : state.passeios.find(x => x.id === id);
             if (!item || state.loadingAI[id]) return;
             window.setState({ loadingAI: { ...state.loadingAI, [id]: true } });
+
             try {
                 const apiKey = state.geminiKey || db.get('gemini_key', '');
                 if (!apiKey || apiKey.length < 10) {
@@ -401,7 +402,10 @@
                     throw new Error("MISSING_KEY");
                 }
 
-                const genAI = { getGenerativeModel: () => ({ generateContent: () => ({ response: { text: () => "IA desativada." } }) }) };
+                // Carregamento dinâmico para não travar o site se a biblioteca falhar
+                const { GoogleGenAI } = await import("https://esm.sh/@google/generative-ai@0.21.0");
+
+                const genAI = new GoogleGenAI(apiKey);
                 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
                 let prompt = "";
@@ -423,7 +427,8 @@
                 window.setState({ aiSuggestions: newCache, loadingAI: { ...state.loadingAI, [id]: false } });
             } catch (error) {
                 console.error("Erro na IA:", error);
-                alert("Erro ao usar a IA: " + error.message + ". Verifique sua chave em Ajustes.");
+                const msg = error.message.includes("Failed to fetch") ? "Erro de conexão ao carregar a IA. Verifique sua internet." : error.message;
+                alert("Erro ao usar a IA: " + msg);
                 window.setState({ loadingAI: { ...state.loadingAI, [id]: false } });
             }
         };
