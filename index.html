@@ -222,8 +222,8 @@
         let state = {
             view: window.location.hash.replace('#', '') || 'dashboard',
             user: initialUser,
-            theme: db.get('theme', 'default'),
-            mode: db.get('mode', 'dark'),
+            theme: db.get('theme', 'green'),
+            mode: db.get('mode', 'light'),
             geminiKey: db.get('gemini_key', ''),
             hospedagens: [],
             deslocamentos: [],
