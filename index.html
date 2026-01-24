@@ -402,19 +402,25 @@
                     throw new Error("MISSING_KEY");
                 }
 
-                // Carregamento dinâmico para não travar o site se a biblioteca falhar
-                const { GoogleGenAI } = await import("https://esm.sh/@google/generative-ai@0.21.0");
+                // Importa a biblioteca estável de forma dinâmica
+                const module = await import("https://esm.sh/@google/generative-ai@0.21.0");
+                // A classe correta nesta versão é GoogleGenerativeAI
+                const { GoogleGenerativeAI } = module;
 
-                const genAI = new GoogleGenAI(apiKey);
+                if (!GoogleGenerativeAI) {
+                    throw new Error("Não foi possível carregar a biblioteca GoogleGenerativeAI.");
+                }
+
+                const genAI = new GoogleGenerativeAI(apiKey);
                 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
                 let prompt = "";
                 if (type === 'hospedagem') {
                     prompt = `Atue como um concierge VIP. Para o hotel "${item.hotel}" em "${item.cidade}", forneça sugestões úteis num raio de 500 metros (caminhada). Liste: estações de transporte, supermercados, farmácias e cafeterias para café da manhã. Seja conciso e prático.`;
                 } else {
-                    prompt = `Atue como um especialista em roteiros turísticos. Para o passeio que sai de "${item.origem}" e pretende visitar estes locais: "${item.locais_visitar}". 
-                    1. Analise geograficamente os locais e sugira a melhor sequência lógica para visitá-los partindo da origem. 
-                    2. Sugira os melhores caminhos ou meios de transporte recomendados entre eles. 
+                    prompt = `Atue como um especialista em roteiros turísticos. Para o passeio que sai de "${item.origem}" e pretende visitar estes locais: "${item.locais_visitar}".
+                    1. Analise geograficamente os locais e sugira a melhor sequência lógica para visitá-los partindo da origem.
+                    2. Sugira os melhores caminhos ou meios de transporte recomendados entre eles.
                     3. Forneça dicas práticas de tempo e logística. Seja conciso e organize em tópicos práticos.`;
                 }
 
@@ -427,7 +433,10 @@
                 window.setState({ aiSuggestions: newCache, loadingAI: { ...state.loadingAI, [id]: false } });
             } catch (error) {
                 console.error("Erro na IA:", error);
-                const msg = error.message.includes("Failed to fetch") ? "Erro de conexão ao carregar a IA. Verifique sua internet." : error.message;
+                let msg = error.message;
+                if (msg.includes("Failed to fetch")) msg = "Erro de conexão ao carregar a biblioteca da IA.";
+                if (msg.includes("403")) msg = "Chave de API inválida ou sem permissão.";
+
                 alert("Erro ao usar a IA: " + msg);
                 window.setState({ loadingAI: { ...state.loadingAI, [id]: false } });
             }
