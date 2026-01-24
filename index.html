@@ -259,7 +259,7 @@
             if (!state.user) return;
             window.setState({ isLoading: true });
             try {
-                const [h, d, c, m, hist] = await Promise.all([
+                const [h, d, c, m, hist, p] = await Promise.all([
                     supabase.from('hospedagens').select('*').order('data_chegada', { ascending: true }),
                     supabase.from('deslocamentos').select('*').order('data', { ascending: true }),
                     supabase.from('checklist_items').select('*').order('criado_em', { ascending: false }),
