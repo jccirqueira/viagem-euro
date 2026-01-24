@@ -188,22 +188,15 @@
             padding-left: 3rem !important;
         }
     </style>
-    <script type="importmap">
-{
-  "imports": {
-    "@google/generative-ai": "https://esm.sh/@google/generative-ai@0.21.0",
-    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.45.4"
-  }
-}
-</script>
+
 </head>
 
 <body class="antialiased overflow-hidden">
     <div id="app" class="h-screen w-full flex overflow-hidden"></div>
 
     <script type="module">
-        import { GoogleGenAI } from "@google/generative-ai";
-        import { createClient } from "@supabase/supabase-js";
+        import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+        console.log("App starting...");
 
         const supabaseUrl = 'https://aweipematwhmvnyksrpu.supabase.co';
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF3ZWlwZW1hdHdobXZueWtzcnB1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4MTkzOTEsImV4cCI6MjA4NDM5NTM5MX0.0vLWeMbUg_tJSSEO63-Mkr-1DQHCITMy8ldEkIYHwlQ';
@@ -408,7 +401,7 @@
                     throw new Error("MISSING_KEY");
                 }
 
-                const genAI = new GoogleGenAI(apiKey);
+                const genAI = { getGenerativeModel: () => ({ generateContent: () => ({ response: { text: () => "IA desativada." } }) }) };
                 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
                 let prompt = "";
@@ -1238,6 +1231,7 @@
 
             if (state.user) fetchData();
             render();
+            console.log("App ready.");
         } catch (e) {
             console.error("Erro crítico na inicialização:", e);
             // Tenta forçar o render mesmo com erro
